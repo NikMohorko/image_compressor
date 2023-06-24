@@ -4,7 +4,8 @@ Command-line application for lossy compression of JPEG images, ideal for improvi
 load time of websites.
 
 Each image's final quality is iteratively determined using the structural similarity (SSIM) algorithm, so 
-that the visual difference between original and compressed picture is optimal. 
+that the visual difference between original and compressed picture is optimal. Detailed results 
+are saved to `log.txt`.
 
 The SSIM algorithm is implemented in Cython to increase performance.
 

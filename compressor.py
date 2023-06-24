@@ -3,6 +3,7 @@ from typing_extensions import Annotated
 import os
 from PIL import UnidentifiedImageError
 from shutil import rmtree
+import logging
 
 from image import Img
 
@@ -15,7 +16,11 @@ def compressor(input_dir: Annotated[str, typer.Argument(help='Directory with ori
         raise ValueError('SSIM factor should be between 0 and 1.')
 
     temp_dir = 'temp'
+    logging.basicConfig(filename='log.txt', encoding='utf-8', level=logging.INFO)
+
     failed, complete = 0, 0
+    original_file_size_sum = 0
+    compressed_file_size_sum = 0
 
     with typer.progressbar(os.listdir(input_dir), label='Processing') as filenames:
         for filename in filenames:
@@ -26,17 +31,20 @@ def compressor(input_dir: Annotated[str, typer.Argument(help='Directory with ori
                 image.check_extension()
             except TypeError:
                 failed += 1
+                logging.error(f'Image {filename} skipped - unsupported extension.')
                 continue
 
             try:
                 image.load()
             except UnidentifiedImageError:
                 failed += 1
+                logging.error(f'Image {filename} skipped - file could not be read.')
                 continue
 
             try:
                 optimal_quality = image.get_optimal_quality()
-            except AttributeError:
+            except AttributeError as exc:
+                logging.error(f'Image {filename} skipped - {exc}.')
                 failed += 1
                 continue
 
@@ -44,10 +52,24 @@ def compressor(input_dir: Annotated[str, typer.Argument(help='Directory with ori
                 image.save(output_dir, optimal_quality, 0)
             except OSError:
                 failed += 1
+                logging.error(f'Image {filename} skipped - file could not be saved.')
             else:
                 complete += 1
+                original_size = round(os.path.getsize(os.path.join(input_dir, filename)) / 1024)
+                compressed_size = round(os.path.getsize(os.path.join(temp_dir, filename)) / 1024)
+                original_file_size_sum += original_size
+                compressed_file_size_sum += compressed_size
 
-    print(f'Processing completed. Successful: {complete}, failed: {failed}.')
+                logging.info(f'Image {filename} successfully processed. Quality used: {round(optimal_quality)}, '
+                             f'Original file size: {original_size} kB, Compressed file size: {compressed_size} kB.')
+
+    size_saved_percentage = round((1 - compressed_file_size_sum / original_file_size_sum) * 100)
+
+    logging.info(f'Processing completed. Successful: {complete}, failed: {failed}, '
+                 f'average image size savings: {size_saved_percentage} %.')
+
+    print(f'Processing completed. Successful: {complete}, failed: {failed}, '
+          f'average image size savings: {size_saved_percentage} %.')
 
     rmtree(temp_dir)
 
