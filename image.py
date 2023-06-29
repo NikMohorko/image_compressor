@@ -11,16 +11,39 @@ class Img:
         self.tempdir = tempdir
         self.image_obj = None
         self.optimal_quality = None
+        self.width = None
+        self.height = None
 
         if not os.path.exists(tempdir):
             os.mkdir(tempdir)
 
     def load(self):
         self.image_obj = Image.open(self.file_path, 'r')
+        self.width, self.height = self.image_obj.size
 
     def check_extension(self):
         if not self.file_path.endswith(('.jpg', '.jpeg')):
             raise TypeError
+
+    def save(self, output_dir, quality, subsampling):
+        self.image_obj.save(os.path.join(output_dir, os.path.basename(self.file_path)), 'JPEG', quality=round(quality),
+                            subsampling=subsampling)
+
+    def resize(self, maximum_dimension):
+
+        if maximum_dimension is not None:
+            if self.width > self.height:
+                # Change to the set maximum, or keep it the same if already lower
+                new_width = min(self.width, maximum_dimension)
+                new_height = round(self.height * new_width / self.width)
+
+            else:
+                new_height = min(self.height, maximum_dimension)
+                new_width = round(self.width * new_height / self.width)
+
+            if new_height != self.height and new_width != self.width:
+                self.image_obj = self.image_obj.resize((new_width, new_height))
+                self.width, self.height = self.image_obj.size
 
     def get_optimal_quality(self):
         """Iterative loop to determine optimal quality for set SSIM value."""
@@ -63,7 +86,3 @@ class Img:
             self.save(self.tempdir, current_quality, 0)
 
         return current_quality
-
-    def save(self, output_dir, quality, subsampling):
-        self.image_obj.save(os.path.join(output_dir, os.path.basename(self.file_path)), 'JPEG', quality=round(quality),
-                            subsampling=subsampling)

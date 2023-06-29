@@ -10,10 +10,16 @@ from image import Img
 
 def compressor(input_dir: Annotated[str, typer.Argument(help='Directory with original images')],
                output_dir: Annotated[str, typer.Argument(help='Output directory for compressed images')],
+               max_dimension: Annotated[int, typer.Argument(help='Maximum dimension [px]')] = None,
                ssim_factor: Annotated[float, typer.Argument(help='SSIM factor [0-1.0]')] = 0.97):
 
+    # Input parameter validation
     if ssim_factor <= 0 or ssim_factor >= 1:
         raise ValueError('SSIM factor should be between 0 and 1.')
+
+    if (not isinstance(max_dimension, int) and max_dimension is not None or
+            isinstance(max_dimension, int) and max_dimension <= 0):
+        raise ValueError('Maximum dimension should be a positive number.')
 
     temp_dir = 'temp'
     logging.basicConfig(filename='log.txt', encoding='utf-8', level=logging.INFO)
@@ -48,6 +54,8 @@ def compressor(input_dir: Annotated[str, typer.Argument(help='Directory with ori
                 failed += 1
                 continue
 
+            image.resize(max_dimension)
+
             try:
                 image.save(output_dir, optimal_quality, 0)
             except OSError:
@@ -56,7 +64,7 @@ def compressor(input_dir: Annotated[str, typer.Argument(help='Directory with ori
             else:
                 complete += 1
                 original_size = round(os.path.getsize(os.path.join(input_dir, filename)) / 1024)
-                compressed_size = round(os.path.getsize(os.path.join(temp_dir, filename)) / 1024)
+                compressed_size = round(os.path.getsize(os.path.join(output_dir, filename)) / 1024)
                 original_file_size_sum += original_size
                 compressed_file_size_sum += compressed_size
 

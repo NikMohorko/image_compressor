@@ -22,6 +22,12 @@ def test_get_optimal_quality(img):
     assert 0 < img.get_optimal_quality() < 100
 
 
+def test_resize_image(img):
+    img.load()
+    img.resize(400)
+    assert img.width == 400 and img.height == 300
+
+
 def test_invalid_extension():
     img = Img('tests/test_images/3.bmp', 0.98, 'temp/')
     with pytest.raises(TypeError):

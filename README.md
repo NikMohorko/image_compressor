@@ -25,12 +25,14 @@ python setup.py build_ext --inplace
 ```
 3. Run:
 ```bash
-python compressor.py [input dir] [output dir] [SSIM factor]
+python compressor.py [input dir] [output dir] [maximum dimension] [SSIM factor]
 ```
 
 ### Arguments
 - `input dir`: Path to directory with original images
 - `output dir`: Path to directory where compressed images will be stored
+- `maximum dimension`: Optional; Maximum dimension in pixels to further reduce file size. If used, the aspect ratio
+will be preserved and width/height (whichever larger) will be set to this number.
 - `SSIM factor`: Optional; [0-1.0] SSIM factor, default value of 0.97 usually gives optimal results for most images
 
 ## Technologies used
