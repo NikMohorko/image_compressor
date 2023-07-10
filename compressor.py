@@ -22,7 +22,8 @@ def compressor(input_dir: Annotated[str, typer.Argument(help='Directory with ori
         raise ValueError('Maximum dimension should be a positive number.')
 
     temp_dir = 'temp'
-    logging.basicConfig(filename='log.txt', encoding='utf-8', level=logging.INFO)
+    logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', filename='log.txt', encoding='utf-8',
+                        level=logging.INFO, datefmt='%d-%m-%Y %H:%M:%S')
 
     failed, complete = 0, 0
     original_file_size_sum = 0
