@@ -9,7 +9,7 @@ are saved to `log.txt`.
 
 The SSIM algorithm is implemented in Cython to increase performance.
 
-Supported image types are: JPEG
+Supported input image types are: JPEG
 
 # Setup
 
@@ -19,7 +19,7 @@ Supported image types are: JPEG
 pip install -r requirements.txt
 ```
 
-2. Compile the Cython module:
+2. Navigate to app directory and compile the Cython module:
 ```bash
 python setup.py build_ext --inplace
 ```
@@ -34,6 +34,12 @@ python compressor.py [input dir] [output dir] [maximum dimension] [SSIM factor]
 - `maximum dimension`: Optional; Maximum dimension in pixels to further reduce file size. If used, the aspect ratio
 will be preserved and width/height (whichever larger) will be set to this number.
 - `SSIM factor`: Optional; [0-1.0] SSIM factor, default value of 0.97 usually gives optimal results for most images
+
+### Testing
+After compiling the Cython module you can run unit tests with:
+```bash
+pytest
+```
 
 ## Technologies used
 - Python 3.9
